@@ -16,7 +16,7 @@ jobs:
   # This workflow contains a single job called "build"
   test-first-action:
     # Only run this action on condition
-    # if: ${{ contains(github.event.issue.labels.*.name, 'bug') }}
+    if: ${{ contains(github.event.issue.body, 'honeybadger action test') }}
 
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -35,4 +35,4 @@ jobs:
 
       # Runs interpolated context
       - name: Run interpolated context
-        run: echo '${{ toJSON(github) }}'
+        run: echo '${{ toJSON(github.event.issue) }}'
