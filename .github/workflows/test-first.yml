@@ -11,12 +11,17 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  ISSUE_BODY: ${{ github.event.issue.body }}
+  # https://app.honeybadger.io/projects/57100/faults/*
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   test-first-action:
     # Only run this action on condition
     if: ${{ contains(github.event.issue.body, 'honeybadger action test') }}
+    # if: #{{ contains(github.event.issue.assignees.*.login, 'bjblock') &&  }}
 
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -25,14 +30,21 @@ jobs:
     steps:
       # Runs a single command using the runners shell
       - name: Run a one-line script
-        run: echo Hello, world!
+        run: echo "$ISSUE_BODY"
+        
+      - name: Run a script
+        uses: actions/github-script@v6
+        # id: set-result
+        with:
+          script: |
+            const issueBody = context.payload.issue.body
+            const regex = /https:\/\/app\.honeybadger\.io\/projects\/57100\/faults\/(?<errorId>\d+)/gi;
+            const matches = issueBody.matchAll(regex)
+            for (const match of matches) {
+              console.log(match.groups.errorId);
+            }
+          # script: return "Hello!"
+          # result-encoding: string
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
-
-      # Runs interpolated context
-      - name: Run interpolated context
-        run: echo '${{ toJSON(github.event.issue) }}'
+      # - name: Get result
+        # run: echo "${{steps.set-result.outputs.result}}"
